@@ -51,11 +51,15 @@ class TouchPositionCorrectionUtils {
         if (x < R0) {
             return A;
         } else if (x < R1) {
-            return (A * (R1 - x) + B * (x - R0)) / (R1 - R0);
+            // For Fleksy-like touch correction, be more forgiving about distances near the center
+            return (A * (R1 - x) + B * (x - R0)) / (R1 - R0) * 0.5f;
         } else if (x < R2) {
-            return (B * (R2 - x) + C * (x - R1)) / (R2 - R1);
+            // Grow distance penalty more slowly to allow keys further away to still match
+            return (B * (R2 - x) + C * (x - R1)) / (R2 - R1) * 0.75f;
         } else {
-            return C;
+            // Allow slightly larger max penalty but scale down overall geometric penalty
+            // so we still consider distant keys
+            return C * 0.85f;
         }
     }
  private:
